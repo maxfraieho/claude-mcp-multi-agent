@@ -1,0 +1,117 @@
+{
+  "mcpServers": {
+    "multi-agent-system": {
+      "command": "node",
+      "args": ["/app/mcp-server/index.js"],
+      "env": {
+        "SSH_PASSWORD_QWEN": "805235io",
+        "SSH_PASSWORD_QWEN04": "805235io.",
+        "SSH_PASSWORD_GEMINI": "805235io",
+        "REDIS_URL": "redis://redis:6379",
+        "VAULT_ADDR": "http://vault:8200",
+        "VAULT_TOKEN": "dev-root-token"
+      }
+    }
+  },
+  "executors": {
+    "claude-code-orchestrator": {
+      "type": "mcp",
+      "name": "🎭 Claude Code (Orchestrator)",
+      "mcpServer": "multi-agent-system",
+      "description": "Claude Code як головний оркестратор - делегує задачі найкращому агенту через MCP",
+      "capabilities": ["orchestration", "planning", "architecture", "coding", "analysis"],
+      "priority": 1,
+      "fallback": ["gemini-flash-2.0-proxy", "qwen-2.5-coder-ssh"],
+      "enabled": true,
+      "notes": "Використовуй цей executor коли потрібен інтелектуальний вибір агента або складна multi-step задача"
+    },
+    "gemini-flash-2.0-proxy": {
+      "type": "openai-compatible",
+      "name": "Gemini Flash 2.0 (Direct)",
+      "model": "gemini-2.0-flash-exp",
+      "apiUrl": "http://gemini-proxy:8080/v1",
+      "apiKey": "proxy-managed",
+      "description": "Прямий доступ до Gemini Flash 2.0 через наш proxy (без оркестрації)",
+      "capabilities": ["coding", "analysis", "refactoring", "chat"],
+      "maxTokens": 8192,
+      "temperature": 0.7,
+      "priority": 2
+    },
+    "gemini-flash-thinking-proxy": {
+      "type": "openai-compatible",
+      "name": "Gemini Flash Thinking (Proxy)",
+      "model": "gemini-2.0-flash-thinking-exp",
+      "apiUrl": "http://gemini-proxy:8080/v1",
+      "apiKey": "proxy-managed",
+      "description": "Gemini Flash Thinking для складних reasoning задач",
+      "capabilities": ["reasoning", "problem-solving", "architecture"],
+      "maxTokens": 8192,
+      "temperature": 0.5
+    },
+    "gemini-pro-proxy": {
+      "type": "openai-compatible",
+      "name": "Gemini Pro 1.5 (Proxy)",
+      "model": "gemini-1.5-pro-latest",
+      "apiUrl": "http://gemini-proxy:8080/v1",
+      "apiKey": "proxy-managed",
+      "description": "Gemini Pro 1.5 для great context та складних завдань",
+      "capabilities": ["coding", "analysis", "documentation", "refactoring"],
+      "maxTokens": 32768,
+      "temperature": 0.7
+    },
+    "qwen-2.5-coder-ssh": {
+      "type": "ssh",
+      "name": "Qwen 2.5 Coder 32B (SSH)",
+      "host": "100.100.74.9",
+      "port": 22,
+      "username": "vokov",
+      "command": "qwen-cli",
+      "description": "Qwen 2.5 Coder через SSH на віддаленому сервері",
+      "capabilities": ["coding", "debugging", "testing", "refactoring"]
+    },
+    "qwen-local-ssh": {
+      "type": "ssh",
+      "name": "Qwen Local (SSH)",
+      "host": "192.168.1.10",
+      "port": 22,
+      "username": "vokov",
+      "command": "qwen-cli",
+      "description": "Qwen на локальному сервері",
+      "capabilities": ["coding", "refactoring"]
+    },
+    "minimax-proxy": {
+      "type": "openai-compatible",
+      "name": "MiniMax (Proxy - coming soon)",
+      "model": "minimax-latest",
+      "apiUrl": "http://minimax-proxy:8084/v1",
+      "apiKey": "proxy-managed",
+      "description": "MiniMax через наш proxy (буде додано пізніше)",
+      "capabilities": ["coding", "chat"],
+      "enabled": false
+    }
+  },
+  "proxyServices": {
+    "gemini": {
+      "internal": "http://gemini-proxy:8080",
+      "external": "https://gemini.exodus.pp.ua",
+      "healthCheck": "/health",
+      "metrics": "/metrics"
+    },
+    "qwen": {
+      "internal": "http://qwen-proxy:8091",
+      "external": "https://qwen.exodus.pp.ua",
+      "healthCheck": "/health",
+      "enabled": false
+    },
+    "minimax": {
+      "internal": "http://minimax-proxy:8084",
+      "external": "https://minimax.exodus.pp.ua",
+      "healthCheck": "/health",
+      "enabled": false
+    },
+    "mcp": {
+      "internal": "http://mcp-server:8765",
+      "external": "https://mcp.exodus.pp.ua"
+    }
+  }
+}

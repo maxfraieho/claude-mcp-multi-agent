@@ -82,3 +82,11 @@ dev_assets
 .ssh
 
 vibe-kanban-cloud/
+
+# Data directories (PostgreSQL, Grafana, etc.)
+data/
+!data/.gitkeep
+
+# Secrets (but keep the directory structure)
+secrets/*.txt
+!secrets/.gitkeep
